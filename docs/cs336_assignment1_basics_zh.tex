@@ -1,0 +1,100 @@
+\documentclass[UTF8,11pt,fontset=none]{ctexart}
+
+\usepackage[letterpaper,margin=0.78in,headheight=23pt]{geometry}
+\usepackage{xcolor}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{fvextra}
+\usepackage{hyperref}
+\usepackage[
+  fencedCode,
+  footnotes,
+  texMathDollars,
+  pipeTables,
+  smartEllipses,
+  tightLists=false
+]{markdown}
+
+\definecolor{Ink}{HTML}{202124}
+\definecolor{Forest}{HTML}{176B5B}
+\definecolor{Gold}{HTML}{A56A00}
+\definecolor{RuleGray}{HTML}{D8DBDE}
+\definecolor{LinkBlue}{HTML}{1769AA}
+
+\setmainfont{TeX Gyre Pagella}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{DejaVu Sans Mono}[Scale=0.82]
+\setCJKmainfont{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+
+\ctexset{
+  section={
+    format=\Large\bfseries\sffamily\color{Forest},
+    beforeskip=1.4em,
+    afterskip=0.65em
+  },
+  subsection={
+    format=\large\bfseries\sffamily\color{Ink},
+    beforeskip=1.15em,
+    afterskip=0.5em
+  },
+  subsubsection={
+    format=\normalsize\bfseries\sffamily\color{Gold},
+    beforeskip=0.95em,
+    afterskip=0.4em
+  }
+}
+
+\setlength{\parindent}{2em}
+\setlength{\parskip}{0.25em}
+\setlist{leftmargin=2em,itemsep=0.18em,topsep=0.3em}
+\setlength{\emergencystretch}{3em}
+\allowdisplaybreaks[2]
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=Forest,
+  urlcolor=LinkBlue,
+  citecolor=Gold,
+  pdfauthor={CS336 Staff; unofficial Chinese translation},
+  pdftitle={CS336 Assignment 1 Basics - Unofficial Chinese Translation}
+}
+
+\markdownSetup{rendererPrototypes={
+  headingOne={
+    \thispagestyle{empty}
+    \begin{center}
+      {\fontsize{22}{28}\selectfont\bfseries\sffamily\color{Forest}#1}
+    \end{center}
+    \vspace{0.6em}
+  },
+  headingTwo={\section*{#1}\addcontentsline{toc}{section}{#1}},
+  headingThree={\subsection*{#1}\addcontentsline{toc}{subsection}{#1}},
+  headingFour={\subsubsection*{#1}}
+}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\sffamily CS336 作业 1：基础}
+\fancyhead[R]{\small\sffamily 非官方中文翻译}
+\fancyfoot[C]{\small\sffamily\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\headrule}{\hbox to\headwidth{\color{RuleGray}\leaders\hrule height \headrulewidth\hfill}}
+
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{
+  breaklines=true,
+  breakanywhere=true,
+  fontsize=\small,
+  frame=single,
+  framesep=3mm,
+  rulecolor=\color{RuleGray}
+}
+
+\begin{document}
+\color{Ink}
+\markdownInput{docs/cs336_assignment1_basics_zh.md}
+\end{document}
