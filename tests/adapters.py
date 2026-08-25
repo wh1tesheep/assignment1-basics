@@ -17,16 +17,16 @@ def run_linear(
     in_features: Float[Tensor, " ... d_in"],
 ) -> Float[Tensor, " ... d_out"]:
     """
-    Given the weights of a Linear layer, compute the transformation of a batched input.
+    给定 Linear 层的权重，计算批量输入的线性变换。
 
-    Args:
-        in_dim (int): The size of the input dimension
-        out_dim (int): The size of the output dimension
-        weights (Float[Tensor, "d_out d_in"]): The linear weights to use
-        in_features (Float[Tensor, "... d_in"]): The output tensor to apply the function to
+    参数：
+        in_dim (int)：输入维度的大小。
+        out_dim (int)：输出维度的大小。
+        weights (Float[Tensor, "d_out d_in"])：要使用的线性层权重。
+        in_features (Float[Tensor, "... d_in"])：要应用该函数的输入 Tensor。
 
-    Returns:
-        Float[Tensor, "... d_out"]: The transformed output of your linear module.
+    返回：
+        Float[Tensor, "... d_out"]：线性模块变换后的输出。
     """
 
     raise NotImplementedError
@@ -39,16 +39,16 @@ def run_embedding(
     token_ids: Int[Tensor, " ..."],
 ) -> Float[Tensor, " ... d_model"]:
     """
-    Given the weights of an Embedding layer, get the embeddings for a batch of token ids.
+    给定 Embedding 层的权重，获取一批 token ID 对应的嵌入表示。
 
-    Args:
-        vocab_size (int): The number of embeddings in the vocabulary
-        d_model (int): The size of the embedding dimension
-        weights (Float[Tensor, "vocab_size d_model"]): The embedding vectors to fetch from
-        token_ids (Int[Tensor, "..."]): The set of token ids to fetch from the Embedding layer
+    参数：
+        vocab_size (int)：词表中的嵌入数量。
+        d_model (int)：嵌入维度的大小。
+        weights (Float[Tensor, "vocab_size d_model"])：从中查找嵌入向量的权重。
+        token_ids (Int[Tensor, "..."])：要从 Embedding 层中查找的一组 token ID。
 
-    Returns:
-        Float[Tensor, "... d_model"]: Batch of embeddings returned by your Embedding layer.
+    返回：
+        Float[Tensor, "... d_model"]：Embedding 层返回的一批嵌入表示。
     """
 
     raise NotImplementedError
@@ -62,24 +62,23 @@ def run_swiglu(
     w3_weight: Float[Tensor, " d_ff d_model"],
     in_features: Float[Tensor, " ... d_model"],
 ) -> Float[Tensor, " ... d_model"]:
-    """Given the weights of a SwiGLU network, return
-    the output of your implementation with these weights.
+    """给定 SwiGLU 网络的权重，返回你的实现使用这些权重得到的输出。
 
-    Args:
-        d_model (int): Dimensionality of the feedforward input and output.
-        d_ff (int): Dimensionality of the up-project happening internally to your swiglu.
-        w1_weight (Float[Tensor, "d_ff d_model"]): Stored weights for W1
-        w2_weight (Float[Tensor, "d_model d_ff"]): Stored weights for W2
-        w3_weight (Float[Tensor, "d_ff d_model"]): Stored weights for W3
-        in_features (Float[Tensor, "... d_model"]): Input embeddings to the feed-forward layer.
+    参数：
+        d_model (int)：前馈网络输入和输出的维度。
+        d_ff (int)：SwiGLU 内部上投影的维度。
+        w1_weight (Float[Tensor, "d_ff d_model"])：保存的 W1 权重。
+        w2_weight (Float[Tensor, "d_model d_ff"])：保存的 W2 权重。
+        w3_weight (Float[Tensor, "d_ff d_model"])：保存的 W3 权重。
+        in_features (Float[Tensor, "... d_model"])：前馈层的输入嵌入。
 
-    Returns:
-        Float[Tensor, "... d_model"]: Output embeddings of the same shape as the input embeddings.
+    返回：
+        Float[Tensor, "... d_model"]：与输入嵌入 shape 相同的输出嵌入。
     """
-    # Example:
-    # If your state dict keys match, you can use `load_state_dict()`
+    # 示例：
+    # 如果状态字典中的键名匹配，可以使用 `load_state_dict()`
     # swiglu.load_state_dict(weights)
-    # You can also manually assign the weights
+    # 也可以手动赋值权重
     # swiglu.w1.weight.data = w1_weight
     # swiglu.w2.weight.data = w2_weight
     # swiglu.w3.weight.data = w3_weight
@@ -93,16 +92,15 @@ def run_scaled_dot_product_attention(
     mask: Bool[Tensor, " ... queries keys"] | None = None,
 ) -> Float[Tensor, " ... queries d_v"]:
     """
-    Given key (K), query (Q), and value (V) tensors, return
-    the output of your scaled dot product attention implementation.
+    给定键（K）、查询（Q）和值（V）Tensor，返回你的缩放点积注意力实现的输出。
 
-    Args:
-        Q (Float[Tensor, " ... queries d_k"]): Query tensor
-        K (Float[Tensor, " ... keys d_k"]): Key tensor
-        V (Float[Tensor, " ... keys d_v"]): Values tensor
-        mask (Bool[Tensor, " ... queries keys"] | None): Mask tensor
-    Returns:
-        Float[Tensor, " ... queries d_v"]: Output of SDPA
+    参数：
+        Q (Float[Tensor, " ... queries d_k"])：查询 Tensor。
+        K (Float[Tensor, " ... keys d_k"])：键 Tensor。
+        V (Float[Tensor, " ... keys d_v"])：值 Tensor。
+        mask (Bool[Tensor, " ... queries keys"] | None)：掩码 Tensor。
+    返回：
+        Float[Tensor, " ... queries d_v"]：SDPA 的输出。
     """
     raise NotImplementedError
 
@@ -117,26 +115,24 @@ def run_multihead_self_attention(
     in_features: Float[Tensor, " ... sequence_length d_model"],
 ) -> Float[Tensor, " ... sequence_length d_model"]:
     """
-    Given the key, query, and value projection weights of a naive unbatched
-    implementation of multi-head attention, return the output of an optimized batched
-    implementation. This implementation should handle the key, query, and value projections
-    for all heads in a single matrix multiply.
-    This function should not use RoPE.
-    See section 3.2.2 of Vaswani et al., 2017.
+    给定朴素、无批次的多头注意力实现中的键、查询和值投影权重，返回优化后的批处理实现的输出。
+    该实现应通过一次矩阵乘法处理所有注意力头的键、查询和值投影。
+    此函数不应使用 RoPE。
+    参见 Vaswani 等人（2017）的第 3.2.2 节。
 
-    Args:
-        d_model (int): Dimensionality of the feedforward input and output.
-        num_heads (int): Number of heads to use in multi-headed attention.
-        max_seq_len (int): Maximum sequence length to pre-cache if your implementation does that.
-        q_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the Q projection
-        k_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the K projection
-        v_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the V projection
-        o_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the output projection
-        in_features (Float[Tensor, "... sequence_length d_model"]): Tensor to run your implementation on.
+    参数：
+        d_model (int)：前馈网络输入和输出的维度。
+        num_heads (int)：多头注意力使用的注意力头数量。
+        max_seq_len (int)：如果实现会预先缓存，则为要缓存的最大序列长度。
+        q_proj_weight (Float[Tensor, "d_model d_model"])：Q 投影的权重。
+        k_proj_weight (Float[Tensor, "d_model d_model"])：K 投影的权重。
+        v_proj_weight (Float[Tensor, "d_model d_model"])：V 投影的权重。
+        o_proj_weight (Float[Tensor, "d_model d_model"])：输出投影的权重。
+        in_features (Float[Tensor, "... sequence_length d_model"])：要交给你的实现处理的 Tensor。
 
-    Returns:
-        Float[Tensor, " ... sequence_length d_model"]: Tensor with the output of running your optimized, batched multi-headed attention
-        implementation with the given QKV projection weights and input features.
+    返回：
+        Float[Tensor, " ... sequence_length d_model"]：使用给定 QKV 投影权重和输入特征运行优化后的
+        批处理多头注意力实现所得到的输出 Tensor。
     """
     raise NotImplementedError
 
@@ -154,29 +150,27 @@ def run_multihead_self_attention_with_rope(
     token_positions: Int[Tensor, " ... sequence_length"] | None = None,
 ) -> Float[Tensor, " ... sequence_length d_model"]:
     """
-    Given the key, query, and value projection weights of a naive unbatched
-    implementation of multi-head attention, return the output of an optimized batched
-    implementation. This implementation should handle the key, query, and value projections
-    for all heads in a single matrix multiply.
-    This version of MHA should include RoPE.
-    In this case, the RoPE embedding dimension must be the head embedding dimension (d_model // num_heads).
-    See section 3.2.2 of Vaswani et al., 2017.
+    给定朴素、无批次的多头注意力实现中的键、查询和值投影权重，返回优化后的批处理实现的输出。
+    该实现应通过一次矩阵乘法处理所有注意力头的键、查询和值投影。
+    此版本的 MHA 应包含 RoPE。
+    在这种情况下，RoPE 嵌入维度必须等于单个注意力头的嵌入维度（d_model // num_heads）。
+    参见 Vaswani 等人（2017）的第 3.2.2 节。
 
-    Args:
-        d_model (int): Dimensionality of the feedforward input and output.
-        num_heads (int): Number of heads to use in multi-headed attention.
-        max_seq_len (int): Maximum sequence length to pre-cache if your implementation does that.
-        theta (float): RoPE parameter.
-        q_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the Q projection
-        k_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the K projection
-        v_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the V projection
-        o_proj_weight (Float[Tensor, "d_model d_model"]): Weights for the output projection
-        in_features (Float[Tensor, "... sequence_length d_model"]): Tensor to run your implementation on.
-        token_positions (Int[Tensor, " ... sequence_length"] | None): Optional tensor with the positions of the tokens
+    参数：
+        d_model (int)：前馈网络输入和输出的维度。
+        num_heads (int)：多头注意力使用的注意力头数量。
+        max_seq_len (int)：如果实现会预先缓存，则为要缓存的最大序列长度。
+        theta (float)：RoPE 参数。
+        q_proj_weight (Float[Tensor, "d_model d_model"])：Q 投影的权重。
+        k_proj_weight (Float[Tensor, "d_model d_model"])：K 投影的权重。
+        v_proj_weight (Float[Tensor, "d_model d_model"])：V 投影的权重。
+        o_proj_weight (Float[Tensor, "d_model d_model"])：输出投影的权重。
+        in_features (Float[Tensor, "... sequence_length d_model"])：要交给你的实现处理的 Tensor。
+        token_positions (Int[Tensor, " ... sequence_length"] | None)：包含 token 位置的可选 Tensor。
 
-    Returns:
-        Float[Tensor, " ... sequence_length d_model"]: Tensor with the output of running your optimized, batched multi-headed attention
-        implementation with the given QKV projection weights and input features.
+    返回：
+        Float[Tensor, " ... sequence_length d_model"]：使用给定 QKV 投影权重和输入特征运行优化后的
+        批处理多头注意力实现所得到的输出 Tensor。
     """
     raise NotImplementedError
 
@@ -189,16 +183,17 @@ def run_rope(
     token_positions: Int[Tensor, " ... sequence_length"],
 ) -> Float[Tensor, " ... sequence_length d_k"]:
     """
-    Run RoPE for a given input tensor.
+    对给定的输入 Tensor 应用 RoPE。
 
-    Args:
-        d_k (int): Embedding dimension size for the query or key tensor.
-        theta (float): RoPE parameter.
-        max_seq_len (int): Maximum sequence length to pre-cache if your implementation does that.
-        in_query_or_key (Float[Tensor, "... sequence_length d_k"]): Input tensor to run RoPE on.
-        token_positions (Int[Tensor, "... sequence_length"]): Tensor of shape (batch_size, sequence_length) with the token positions
-    Returns:
-        Float[Tensor, " ... sequence_length d_k"]: Tensor with RoPEd input.
+    参数：
+        d_k (int)：查询或键 Tensor 的嵌入维度大小。
+        theta (float)：RoPE 参数。
+        max_seq_len (int)：如果实现会预先缓存，则为要缓存的最大序列长度。
+        in_query_or_key (Float[Tensor, "... sequence_length d_k"])：要应用 RoPE 的输入 Tensor。
+        token_positions (Int[Tensor, "... sequence_length"])：包含 token 位置、shape 为
+            (batch_size, sequence_length) 的 Tensor。
+    返回：
+        Float[Tensor, " ... sequence_length d_k"]：应用 RoPE 后的输入 Tensor。
     """
     raise NotImplementedError
 
@@ -213,65 +208,60 @@ def run_transformer_block(
     in_features: Float[Tensor, " batch sequence_length d_model"],
 ) -> Float[Tensor, " batch sequence_length d_model"]:
     """
-    Given the weights of a pre-norm Transformer block and input features,
-    return the output of running the Transformer block on the input features.
+    给定 pre-norm Transformer block 的权重和输入特征，返回在这些输入特征上运行该 block 的输出。
 
-    This function should use RoPE.
-    Depending on your implementation, you may simply need to pass the relevant args
-    to your TransformerBlock constructor, or you may need to initialize your own RoPE
-    class and pass that instead.
+    此函数应使用 RoPE。
+    根据你的实现方式，你可能只需将相关参数传给 TransformerBlock 构造函数，
+    也可能需要自行初始化 RoPE 类并将其传入。
 
-    Args:
-        d_model (int): The dimensionality of the Transformer block input.
-        num_heads (int): Number of heads to use in multi-headed attention. `d_model` must be
-            evenly divisible by `num_heads`.
-        d_ff (int): Dimensionality of the feed-forward inner layer.
-        max_seq_len (int): Maximum sequence length to pre-cache if your implementation does that.
-        theta (float): RoPE parameter.
+    参数：
+        d_model (int)：Transformer block 输入的维度。
+        num_heads (int)：多头注意力使用的注意力头数量；`d_model` 必须能被 `num_heads` 整除。
+        d_ff (int)：前馈网络内部层的维度。
+        max_seq_len (int)：如果实现会预先缓存，则为要缓存的最大序列长度。
+        theta (float)：RoPE 参数。
         weights (dict[str, Tensor]):
-            State dict of our reference implementation.
-            The keys of this dictionary are:
+            参考实现的状态字典。
+            该字典包含以下键：
             - `attn.q_proj.weight`
-                The query projections for all `num_heads` attention heads.
-                Shape is (d_model, d_model).
-                The rows are ordered by matrices of shape (num_heads, d_k),
-                so `attn.q_proj.weight == torch.cat([q_heads.0.weight, ..., q_heads.N.weight], dim=0)`.
+                所有 `num_heads` 个注意力头的查询投影。
+                Shape 为 (d_model, d_model)。
+                各行按照 shape 为 (num_heads, d_k) 的矩阵排列，
+                因此 `attn.q_proj.weight == torch.cat([q_heads.0.weight, ..., q_heads.N.weight], dim=0)`。
             - `attn.k_proj.weight`
-                The key projections for all `num_heads` attention heads.
-                Shape is (d_model, d_model).
-                The rows are ordered by matrices of shape (num_heads, d_k),
-                so `attn.k_proj.weight == torch.cat([k_heads.0.weight, ..., k_heads.N.weight], dim=0)`.
+                所有 `num_heads` 个注意力头的键投影。
+                Shape 为 (d_model, d_model)。
+                各行按照 shape 为 (num_heads, d_k) 的矩阵排列，
+                因此 `attn.k_proj.weight == torch.cat([k_heads.0.weight, ..., k_heads.N.weight], dim=0)`。
             - `attn.v_proj.weight`
-                The value projections for all `num_heads` attention heads.
-                Shape is (d_model, d_model).
-                The rows are ordered by matrices of shape (num_heads, d_v),
-                so `attn.v_proj.weight == torch.cat([v_heads.0.weight, ..., v_heads.N.weight], dim=0)`.
+                所有 `num_heads` 个注意力头的值投影。
+                Shape 为 (d_model, d_model)。
+                各行按照 shape 为 (num_heads, d_v) 的矩阵排列，
+                因此 `attn.v_proj.weight == torch.cat([v_heads.0.weight, ..., v_heads.N.weight], dim=0)`。
             - `attn.output_proj.weight`
-                Weight of the multi-head self-attention output projection
-                Shape is (d_model, d_model).
+                多头自注意力输出投影的权重。
+                Shape 为 (d_model, d_model)。
             - `ln1.weight`
-                Weights of affine transform for the first RMSNorm
-                applied in the transformer block.
-                Shape is (d_model,).
+                Transformer block 中第一个 RMSNorm 所应用的仿射变换权重。
+                Shape 为 (d_model,)。
             - `ffn.w1.weight`
-                Weight of the first linear transformation in the FFN.
-                Shape is (d_ff, d_model).
+                FFN 中第一个线性变换的权重。
+                Shape 为 (d_ff, d_model)。
             - `ffn.w2.weight`
-                Weight of the second linear transformation in the FFN.
-                Shape is (d_model, d_ff).
+                FFN 中第二个线性变换的权重。
+                Shape 为 (d_model, d_ff)。
             - `ffn.w3.weight`
-                Weight of the third linear transformation in the FFN.
-                Shape is (d_ff, d_model).
+                FFN 中第三个线性变换的权重。
+                Shape 为 (d_ff, d_model)。
             - `ln2.weight`
-                Weights of affine transform for the second RMSNorm
-                applied in the transformer block.
-                Shape is (d_model,).
+                Transformer block 中第二个 RMSNorm 所应用的仿射变换权重。
+                Shape 为 (d_model,)。
         in_features (Float[Tensor, "batch sequence_length d_model"]):
-            Tensor to run your implementation on.
+            要交给你的实现处理的 Tensor。
 
-    Returns:
-        Float[Tensor, "batch sequence_length d_model"] Tensor with the output of
-        running the Transformer block on the input features while using RoPE.
+    返回：
+        Float[Tensor, "batch sequence_length d_model"]：使用 RoPE 在输入特征上运行
+        Transformer block 后得到的输出 Tensor。
     """
     raise NotImplementedError
 
@@ -287,73 +277,68 @@ def run_transformer_lm(
     weights: dict[str, Tensor],
     in_indices: Int[Tensor, " batch_size sequence_length"],
 ) -> Float[Tensor, " batch_size sequence_length vocab_size"]:
-    """Given the weights of a Transformer language model and input indices,
-    return the output of running a forward pass on the input indices.
+    """给定 Transformer 语言模型的权重和输入索引，返回对输入索引执行前向传播的输出。
 
-    This function should use RoPE.
+    此函数应使用 RoPE。
 
-    Args:
-        vocab_size (int): The number of unique items in the output vocabulary to be predicted.
-        context_length (int): The maximum number of tokens to process at once.
-        d_model (int): The dimensionality of the model embeddings and sublayer outputs.
-        num_layers (int): The number of Transformer layers to use.
-        num_heads (int): Number of heads to use in multi-headed attention. `d_model` must be
-            evenly divisible by `num_heads`.
-        d_ff (int): Dimensionality of the feed-forward inner layer (section 3.3).
-        rope_theta (float): The RoPE $\\Theta$ parameter.
+    参数：
+        vocab_size (int)：待预测输出词表中的不同元素数量。
+        context_length (int)：一次最多处理的 token 数量。
+        d_model (int)：模型嵌入和各子层输出的维度。
+        num_layers (int)：使用的 Transformer 层数。
+        num_heads (int)：多头注意力使用的注意力头数量；`d_model` 必须能被 `num_heads` 整除。
+        d_ff (int)：前馈网络内部层的维度（第 3.3 节）。
+        rope_theta (float)：RoPE 的 $\\Theta$ 参数。
         weights (dict[str, Tensor]):
-            State dict of our reference implementation. {num_layers} refers to an
-            integer between `0` and `num_layers - 1` (the layer index).
-            The keys of this dictionary are:
+            参考实现的状态字典。{num_layers} 表示 `0` 到 `num_layers - 1` 之间的整数（即层索引）。
+            该字典包含以下键：
             - `token_embeddings.weight`
-                Token embedding matrix. Shape is (vocab_size, d_model).
+                Token 嵌入矩阵。Shape 为 (vocab_size, d_model)。
             - `layers.{num_layers}.attn.q_proj.weight`
-                The query projections for all `num_heads` attention heads.
-                Shape is (num_heads * (d_model / num_heads), d_model).
-                The rows are ordered by matrices of shape (num_heads, d_k),
-                so `attn.q_proj.weight == torch.cat([q_heads.0.weight, ..., q_heads.N.weight], dim=0)`.
+                所有 `num_heads` 个注意力头的查询投影。
+                Shape 为 (num_heads * (d_model / num_heads), d_model)。
+                各行按照 shape 为 (num_heads, d_k) 的矩阵排列，
+                因此 `attn.q_proj.weight == torch.cat([q_heads.0.weight, ..., q_heads.N.weight], dim=0)`。
             - `layers.{num_layers}.attn.k_proj.weight`
-                The key projections for all `num_heads` attention heads.
-                Shape is (num_heads * (d_model / num_heads), d_model).
-                The rows are ordered by matrices of shape (num_heads, d_k),
-                so `attn.k_proj.weight == torch.cat([k_heads.0.weight, ..., k_heads.N.weight], dim=0)`.
+                所有 `num_heads` 个注意力头的键投影。
+                Shape 为 (num_heads * (d_model / num_heads), d_model)。
+                各行按照 shape 为 (num_heads, d_k) 的矩阵排列，
+                因此 `attn.k_proj.weight == torch.cat([k_heads.0.weight, ..., k_heads.N.weight], dim=0)`。
             - `layers.{num_layers}.attn.v_proj.weight`
-                The value projections for all `num_heads` attention heads.
-                Shape is (num_heads * (d_model / num_heads), d_model).
-                The rows are ordered by matrices of shape (num_heads, d_v),
-                so `attn.v_proj.weight == torch.cat([v_heads.0.weight, ..., v_heads.N.weight], dim=0)`.
+                所有 `num_heads` 个注意力头的值投影。
+                Shape 为 (num_heads * (d_model / num_heads), d_model)。
+                各行按照 shape 为 (num_heads, d_v) 的矩阵排列，
+                因此 `attn.v_proj.weight == torch.cat([v_heads.0.weight, ..., v_heads.N.weight], dim=0)`。
             - `layers.{num_layers}.attn.output_proj.weight`
-                Weight of the multi-head self-attention output projection
-                Shape is ((d_model / num_heads) * num_heads, d_model).
+                多头自注意力输出投影的权重。
+                Shape 为 ((d_model / num_heads) * num_heads, d_model)。
             - `layers.{num_layers}.ln1.weight`
-                Weights of affine transform for the first RMSNorm
-                applied in the transformer block.
-                Shape is (d_model,).
+                Transformer block 中第一个 RMSNorm 所应用的仿射变换权重。
+                Shape 为 (d_model,)。
             - `layers.{num_layers}.ffn.w1.weight`
-                Weight of the first linear transformation in the FFN.
-                Shape is (d_ff, d_model).
+                FFN 中第一个线性变换的权重。
+                Shape 为 (d_ff, d_model)。
             - `layers.{num_layers}.ffn.w2.weight`
-                Weight of the second linear transformation in the FFN.
-                Shape is (d_model, d_ff).
+                FFN 中第二个线性变换的权重。
+                Shape 为 (d_model, d_ff)。
             - `layers.{num_layers}.ffn.w3.weight`
-                Weight of the third linear transformation in the FFN.
-                Shape is (d_ff, d_model).
+                FFN 中第三个线性变换的权重。
+                Shape 为 (d_ff, d_model)。
             - `layers.{num_layers}.ln2.weight`
-                Weights of affine transform for the second RMSNorm
-                applied in the transformer block.
-                Shape is (d_model,).
+                Transformer block 中第二个 RMSNorm 所应用的仿射变换权重。
+                Shape 为 (d_model,)。
             - `ln_final.weight`
-                Weights of affine transform for RMSNorm applied to the output of the final transformer block.
-                Shape is (d_model, ).
+                应用于最终 Transformer block 输出的 RMSNorm 仿射变换权重。
+                Shape 为 (d_model, )。
             - `lm_head.weight`
-                Weights of the language model output embedding.
-                Shape is (vocab_size, d_model).
-        in_indices (Int[Tensor, "batch_size sequence_length"]) Tensor with input indices to run the language model on. Shape is (batch_size, sequence_length), where
-            `sequence_length` is at most `context_length`.
+                语言模型输出嵌入的权重。
+                Shape 为 (vocab_size, d_model)。
+        in_indices (Int[Tensor, "batch_size sequence_length"])：用于运行语言模型的输入索引 Tensor。
+            Shape 为 (batch_size, sequence_length)，其中 `sequence_length` 不超过 `context_length`。
 
-    Returns:
-        Float[Tensor, "batch_size sequence_length vocab_size"]: Tensor with the predicted unnormalized
-        next-word distribution for each token.
+    返回：
+        Float[Tensor, "batch_size sequence_length vocab_size"]：包含每个 token 的下一词预测结果的 Tensor，
+        这些预测值尚未归一化。
     """
     raise NotImplementedError
 
@@ -364,33 +349,30 @@ def run_rmsnorm(
     weights: Float[Tensor, " d_model"],
     in_features: Float[Tensor, " ... d_model"],
 ) -> Float[Tensor, " ... d_model"]:
-    """Given the weights of a RMSNorm affine transform,
-    return the output of running RMSNorm on the input features.
+    """给定 RMSNorm 仿射变换的权重，返回对输入特征运行 RMSNorm 后的输出。
 
-    Args:
-        d_model (int): The dimensionality of the RMSNorm input.
-        eps: (float): A value added to the denominator for numerical stability.
-        weights (Float[Tensor, "d_model"]): RMSNorm weights.
-        in_features (Float[Tensor, "... d_model"]): Input features to run RMSNorm on. Can have arbitrary leading
-            dimensions.
+    参数：
+        d_model (int)：RMSNorm 输入的维度。
+        eps (float)：为保证数值稳定性而加到分母上的数值。
+        weights (Float[Tensor, "d_model"])：RMSNorm 权重。
+        in_features (Float[Tensor, "... d_model"])：要应用 RMSNorm 的输入特征，
+            可以具有任意前导维度。
 
-    Returns:
-        Float[Tensor,"... d_model"]: Tensor of with the same shape as `in_features` with the output of running
-        RMSNorm of the `in_features`.
+    返回：
+        Float[Tensor,"... d_model"]：对 `in_features` 运行 RMSNorm 后得到的、
+        与 `in_features` shape 相同的 Tensor。
     """
     raise NotImplementedError
 
 
 def run_silu(in_features: Float[Tensor, " ..."]) -> Float[Tensor, " ..."]:
-    """Given a tensor of inputs, return the output of applying SiLU
-    to each element.
+    """给定输入 Tensor，返回对每个元素应用 SiLU 后的输出。
 
-    Args:
-        in_features(Float[Tensor, "..."]): Input features to run SiLU on. Shape is arbitrary.
+    参数：
+        in_features(Float[Tensor, "..."])：要应用 SiLU 的输入特征，shape 可以任意。
 
-    Returns:
-        Float[Tensor,"..."]: of with the same shape as `in_features` with the output of applying
-        SiLU to each element.
+    返回：
+        Float[Tensor,"..."]：对每个元素应用 SiLU 后得到的、与 `in_features` shape 相同的 Tensor。
     """
     raise NotImplementedError
 
@@ -399,37 +381,34 @@ def run_get_batch(
     dataset: npt.NDArray, batch_size: int, context_length: int, device: str
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """
-    Given a dataset (a 1D numpy array of integers) and a desired batch size and
-    context length, sample language modeling input sequences and their corresponding
-    labels from the dataset.
+    给定数据集（由整数组成的一维 NumPy 数组）、期望的 batch size 和上下文长度，
+    从数据集中采样语言模型输入序列及其对应标签。
 
-    Args:
-        dataset (np.array): 1D numpy array of integer token IDs in the dataset.
-        batch_size (int): Desired batch size to sample.
-        context_length (int): Desired context length of each sampled example.
-        device (str): PyTorch device string (e.g., 'cpu' or 'cuda:0') indicating the device
-            to place the sampled input sequences and labels on.
+    参数：
+        dataset (np.array)：包含数据集整数 token ID 的一维 NumPy 数组。
+        batch_size (int)：期望采样的 batch size。
+        context_length (int)：每个采样样本期望的上下文长度。
+        device (str)：PyTorch 设备字符串（例如 'cpu' 或 'cuda:0'），表示采样得到的
+            输入序列和标签应放置在哪个设备上。
 
-    Returns:
-        Tuple of torch.LongTensors of shape (batch_size, context_length). The first tuple item
-        is the sampled input sequences, and the second tuple item is the corresponding
-        language modeling labels.
+    返回：
+        一对 shape 为 (batch_size, context_length) 的 torch.LongTensor。
+        第一个元素是采样的输入序列，第二个元素是对应的语言模型标签。
     """
     raise NotImplementedError
 
 
 def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, " ..."]:
     """
-    Given a tensor of inputs, return the output of softmaxing the given `dim`
-    of the input.
+    给定输入 Tensor，返回沿输入的指定 `dim` 应用 softmax 后的输出。
 
-    Args:
-        in_features (Float[Tensor, "..."]): Input features to softmax. Shape is arbitrary.
-        dim (int): Dimension of the `in_features` to apply softmax to.
+    参数：
+        in_features (Float[Tensor, "..."])：要应用 softmax 的输入特征，shape 可以任意。
+        dim (int)：在 `in_features` 的哪个维度上应用 softmax。
 
-    Returns:
-        Float[Tensor, "..."]: Tensor of with the same shape as `in_features` with the output of
-        softmax normalizing the specified `dim`.
+    返回：
+        Float[Tensor, "..."]：沿指定 `dim` 进行 softmax 归一化后得到的、
+        与 `in_features` shape 相同的 Tensor。
     """
     raise NotImplementedError
 
@@ -437,36 +416,35 @@ def run_softmax(in_features: Float[Tensor, " ..."], dim: int) -> Float[Tensor, "
 def run_cross_entropy(
     inputs: Float[Tensor, " batch_size vocab_size"], targets: Int[Tensor, " batch_size"]
 ) -> Float[Tensor, ""]:
-    """Given a tensor of inputs and targets, compute the average cross-entropy
-    loss across examples.
+    """给定输入和目标 Tensor，计算所有样本的平均交叉熵损失。
 
-    Args:
-        inputs (Float[Tensor, "batch_size vocab_size"]): inputs[i][j] is the
-            unnormalized logit of jth class for the ith example.
-        targets (Int[Tensor, "batch_size"]): Tensor of shape (batch_size,) with the index of the correct class.
-            Each value must be between 0 and `num_classes - 1`.
+    参数：
+        inputs (Float[Tensor, "batch_size vocab_size"])：inputs[i][j] 是第 i 个样本
+            属于第 j 类的未归一化 logit。
+        targets (Int[Tensor, "batch_size"])：shape 为 (batch_size,) 的 Tensor，
+            其中包含正确类别的索引；每个值必须介于 0 和 `num_classes - 1` 之间。
 
-    Returns:
-        Float[Tensor, ""]: The average cross-entropy loss across examples.
+    返回：
+        Float[Tensor, ""]：所有样本的平均交叉熵损失。
     """
     raise NotImplementedError
 
 
 def run_gradient_clipping(parameters: Iterable[torch.nn.Parameter], max_l2_norm: float) -> None:
-    """Given a set of parameters, clip their combined gradients to have l2 norm at most max_l2_norm.
+    """给定一组参数，对它们的联合梯度进行裁剪，使其 L2 范数不超过 max_l2_norm。
 
-    Args:
-        parameters (Iterable[torch.nn.Parameter]): collection of trainable parameters.
-        max_l2_norm (float): a positive value containing the maximum l2-norm.
+    参数：
+        parameters (Iterable[torch.nn.Parameter])：可训练参数的集合。
+        max_l2_norm (float)：表示最大 L2 范数的正数。
 
-    The gradients of the parameters (parameter.grad) should be modified in-place.
+    应就地修改参数的梯度（parameter.grad）。
     """
     raise NotImplementedError
 
 
 def get_adamw_cls() -> Any:
     """
-    Returns a torch.optim.Optimizer that implements AdamW.
+    返回一个实现 AdamW 的 torch.optim.Optimizer。
     """
     raise NotImplementedError
 
@@ -479,22 +457,18 @@ def run_get_lr_cosine_schedule(
     cosine_cycle_iters: int,
 ):
     """
-    Given the parameters of a cosine learning rate decay schedule (with linear
-    warmup) and an iteration number, return the learning rate at the given
-    iteration under the specified schedule.
+    给定带线性预热的余弦学习率衰减调度参数以及迭代次数，
+    返回指定调度在该次迭代时的学习率。
 
-    Args:
-        it (int): Iteration number to get learning rate for.
-        max_learning_rate (float): alpha_max, the maximum learning rate for
-            cosine learning rate schedule (with warmup).
-        min_learning_rate (float): alpha_min, the minimum / final learning rate for
-            the cosine learning rate schedule (with warmup).
-        warmup_iters (int): T_w, the number of iterations to linearly warm-up
-            the learning rate.
-        cosine_cycle_iters (int): T_c, the number of cosine annealing iterations.
+    参数：
+        it (int)：要获取学习率的迭代次数。
+        max_learning_rate (float)：alpha_max，带预热的余弦学习率调度中的最大学习率。
+        min_learning_rate (float)：alpha_min，带预热的余弦学习率调度中的最小或最终学习率。
+        warmup_iters (int)：T_w，线性预热学习率所需的迭代次数。
+        cosine_cycle_iters (int)：T_c，余弦退火的迭代次数。
 
-    Returns:
-        Learning rate at the given iteration under the specified schedule.
+    返回：
+        指定调度在给定迭代次数时的学习率。
     """
     raise NotImplementedError
 
@@ -506,14 +480,14 @@ def run_save_checkpoint(
     out: str | os.PathLike | BinaryIO | IO[bytes],
 ):
     """
-    Given a model, optimizer, and an iteration number, serialize them to disk.
+    给定模型、优化器和迭代次数，将它们序列化到磁盘。
 
-    Args:
-        model (torch.nn.Module): Serialize the state of this model.
-        optimizer (torch.optim.Optimizer): Serialize the state of this optimizer.
-        iteration (int): Serialize this value, which represents the number of training iterations
-            we've completed.
-        out (str | os.PathLike | BinaryIO | IO[bytes]): Path or file-like object to serialize the model, optimizer, and iteration to.
+    参数：
+        model (torch.nn.Module)：要序列化其状态的模型。
+        optimizer (torch.optim.Optimizer)：要序列化其状态的优化器。
+        iteration (int)：要序列化的数值，表示已经完成的训练迭代次数。
+        out (str | os.PathLike | BinaryIO | IO[bytes])：用于保存模型、优化器和迭代次数的
+            路径或文件状对象。
     """
     raise NotImplementedError
 
@@ -524,17 +498,15 @@ def run_load_checkpoint(
     optimizer: torch.optim.Optimizer,
 ) -> int:
     """
-    Given a serialized checkpoint (path or file-like object), restore the
-    serialized state to the given model and optimizer.
-    Return the number of iterations that we previously serialized in
-    the checkpoint.
+    给定序列化检查点（路径或文件状对象），将其中保存的状态恢复到给定模型和优化器，
+    并返回此前序列化到检查点中的迭代次数。
 
-    Args:
-        src (str | os.PathLike | BinaryIO | IO[bytes]): Path or file-like object to serialized checkpoint.
-        model (torch.nn.Module): Restore the state of this model.
-        optimizer (torch.optim.Optimizer): Restore the state of this optimizer.
-    Returns:
-        int: the previously-serialized number of iterations.
+    参数：
+        src (str | os.PathLike | BinaryIO | IO[bytes])：序列化检查点的路径或文件状对象。
+        model (torch.nn.Module)：要恢复状态的模型。
+        optimizer (torch.optim.Optimizer)：要恢复状态的优化器。
+    返回：
+        int：此前序列化的迭代次数。
     """
     raise NotImplementedError
 
@@ -544,20 +516,19 @@ def get_tokenizer(
     merges: list[tuple[bytes, bytes]],
     special_tokens: list[str] | None = None,
 ) -> Any:
-    """Given a vocabulary, a list of merges, and a list of special tokens,
-    return a BPE tokenizer that uses the provided vocab, merges, and special tokens.
+    """给定词表、合并列表和特殊 token 列表，返回使用这些内容的 BPE tokenizer。
 
-    Args:
-        vocab (dict[int, bytes]): The tokenizer vocabulary, a mapping from int (token ID in the vocabulary)
-            to bytes (token bytes)
-        merges (list[tuple[bytes, bytes]]): BPE merges. Each list item is a tuple of bytes (<token1>, <token2>),
-            representing that <token1> was merged with <token2>.
-            Merges are ordered by order of creation.
-        special_tokens (list[str] | None): A list of string special tokens for the tokenizer. These strings will never
-            be split into multiple tokens, and will always be kept as a single token.
+    参数：
+        vocab (dict[int, bytes])：Tokenizer 词表，即从 int（词表中的 token ID）
+            到 bytes（token 字节）的映射。
+        merges (list[tuple[bytes, bytes]])：BPE 合并。列表中的每一项都是一个 bytes 二元组
+            (<token1>, <token2>)，表示将 <token1> 与 <token2> 合并。
+            各项按照合并的创建顺序排列。
+        special_tokens (list[str] | None)：Tokenizer 使用的字符串特殊 token 列表。
+            这些字符串永远不会被拆成多个 token，并始终作为单个 token 保留。
 
-    Returns:
-        A BPE tokenizer that uses the provided vocab, merges, and special tokens.
+    返回：
+        使用所提供词表、合并列表和特殊 token 的 BPE tokenizer。
     """
     raise NotImplementedError
 
@@ -568,25 +539,23 @@ def run_train_bpe(
     special_tokens: list[str],
     **kwargs,
 ) -> tuple[dict[int, bytes], list[tuple[bytes, bytes]]]:
-    """Given the path to an input corpus, run train a BPE tokenizer and
-    output its vocabulary and merges.
+    """给定输入语料库的路径，训练 BPE tokenizer 并输出其词表和合并列表。
 
-    Args:
-        input_path (str | os.PathLike): Path to BPE tokenizer training data.
-        vocab_size (int): Total number of items in the tokenizer's vocabulary (including special tokens).
-        special_tokens (list[str]): A list of string special tokens to be added to the tokenizer vocabulary.
-            These strings will never be split into multiple tokens, and will always be
-            kept as a single token. If these special tokens occur in the `input_path`,
-            they are treated as any other string.
+    参数：
+        input_path (str | os.PathLike)：BPE tokenizer 训练数据的路径。
+        vocab_size (int)：Tokenizer 词表的元素总数，其中包括特殊 token。
+        special_tokens (list[str])：要加入 tokenizer 词表的字符串特殊 token 列表。
+            这些字符串永远不会被拆成多个 token，并始终作为单个 token 保留。
+            如果这些特殊 token 出现在 `input_path` 中，则把它们当作其他普通字符串处理。
 
-    Returns:
+    返回：
         tuple[dict[int, bytes], list[tuple[bytes, bytes]]]:
             vocab:
-                The trained tokenizer vocabulary, a mapping from int (token ID in the vocabulary)
-                to bytes (token bytes)
+                训练得到的 tokenizer 词表，即从 int（词表中的 token ID）
+                到 bytes（token 字节）的映射。
             merges:
-                BPE merges. Each list item is a tuple of bytes (<token1>, <token2>),
-                representing that <token1> was merged with <token2>.
-                Merges are ordered by order of creation.
+                BPE 合并。列表中的每一项都是一个 bytes 二元组 (<token1>, <token2>)，
+                表示将 <token1> 与 <token2> 合并。
+                各项按照合并的创建顺序排列。
     """
     raise NotImplementedError

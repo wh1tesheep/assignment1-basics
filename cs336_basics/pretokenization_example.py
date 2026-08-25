@@ -8,55 +8,55 @@ def find_chunk_boundaries(
     split_special_token: bytes,
 ) -> list[int]:
     """
-    Chunk the file into parts that can be counted independently.
-    May return fewer chunks if the boundaries end up overlapping.
+    将文件切分为可以独立统计的多个块。
+    如果最终的边界发生重叠，返回的块数可能少于期望值。
     """
     assert isinstance(split_special_token, bytes), "Must represent special token as a bytestring"
 
-    # Get total file size in bytes
+    # 获取文件的总字节数
     file.seek(0, os.SEEK_END)
     file_size = file.tell()
     file.seek(0)
 
     chunk_size = file_size // desired_num_chunks
 
-    # Initial guesses for chunk boundary locations, uniformly spaced
-    # Chunks start on previous index, don't include last index
+    # 均匀设置各个分块边界的初始位置
+    # 每个块从前一个索引开始，不包含最后一个索引
     chunk_boundaries = [i * chunk_size for i in range(desired_num_chunks + 1)]
     chunk_boundaries[-1] = file_size
 
-    mini_chunk_size = 4096  # Read ahead by 4k bytes at a time
+    mini_chunk_size = 4096  # 每次向前读取 4 KB 字节
 
     for bi in range(1, len(chunk_boundaries) - 1):
         initial_position = chunk_boundaries[bi]
-        file.seek(initial_position)  # Start at boundary guess
+        file.seek(initial_position)  # 从预估的边界位置开始
         while True:
-            mini_chunk = file.read(mini_chunk_size)  # Read a mini chunk
+            mini_chunk = file.read(mini_chunk_size)  # 读取一个小块
 
-            # If EOF, this boundary should be at the end of the file
+            # 如果到达文件末尾，则将该边界设为文件末尾
             if mini_chunk == b"":
                 chunk_boundaries[bi] = file_size
                 break
 
-            # Find the special token in the mini chunk
+            # 在小块中查找特殊 token
             found_at = mini_chunk.find(split_special_token)
             if found_at != -1:
                 chunk_boundaries[bi] = initial_position + found_at
                 break
             initial_position += mini_chunk_size
 
-    # Make sure all boundaries are unique, but might be fewer than desired_num_chunks
+    # 确保所有边界均不重复，因此边界数量可能少于期望的分块数量
     return sorted(set(chunk_boundaries))
 
 
-## Usage
+## 使用示例
 with open(..., "rb") as f:
     num_processes = 4
     boundaries = find_chunk_boundaries(f, num_processes, b"<|endoftext|>")
 
-    # The following is a serial implementation, but you can parallelize this
-    # by sending each start/end pair to a set of processes.
+    # 以下是串行实现；也可以将每一对起止位置分配给一组进程，
+    # 从而并行执行这部分工作。
     for start, end in zip(boundaries[:-1], boundaries[1:]):
         f.seek(start)
         chunk = f.read(end - start).decode("utf-8", errors="ignore")
-        # Run pre-tokenization on your chunk and store the counts for each pre-token
+        # 对当前块执行预分词，并保存每个预 token 的出现次数
