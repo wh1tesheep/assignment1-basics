@@ -1,3 +1,4 @@
+import os
 import regex as re
 from .pretokenization_example import find_chunk_boundaries
 from collections import Counter
@@ -5,7 +6,7 @@ chunk_token = b"<|endoftext|>"
 PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
 
 def train_bpe(
-    input_path:str,
+    input_path: str | os.PathLike,
     vocab_size:int,
     special_tokens:list[str]
 ) -> tuple[dict[int,bytes],list[tuple[bytes,bytes]]]:
@@ -64,12 +65,33 @@ def train_bpe(
         pair_max_tuple = max(((pair,frequency) for pair,frequency in pair_counts.items()),key=lambda item:(item[1],item[0]))
         pair_max = pair_max_tuple[0]
         merges.append(pair_max)
-        vocab[len(vocab)] = pair_max[0]+pair_max[1]
+        pair_merged = pair_max[0]+pair_max[1]
+        vocab[len(vocab)] = pair_merged
+        #print(pair_merged)
+        ##已经完成一次字节对合并，需要更新pretoken_bytes
+        pretoken_bytes_new:dict[tuple[bytes, ...], int] = {} 
         for bytestuple,frequency in pretoken_bytes.items():
-            
+            i = 0
+            new_tuple = []
+            if len(bytestuple) <2:
+                pretoken_bytes_new[bytestuple] = frequency
+                continue
+            while(i<len(bytestuple)-1):
+                if((bytestuple[i],bytestuple[i+1])==pair_max):
+                    new_tuple.append(pair_merged)
+                    i +=2
+                else:
+                    new_tuple.append(bytestuple[i])
+                    i +=1
+            if(i == len(bytestuple)-1):
+                new_tuple.append(bytestuple[i])
+            new_tuple = tuple(new_tuple)
+            pretoken_bytes_new[new_tuple] = frequency
+        pretoken_bytes = pretoken_bytes_new
 
-
-
+    #print(vocab)
+    #print(merges)
+    #print(pretoken_bytes)
     return (vocab,merges)
 
 
@@ -78,4 +100,4 @@ def train_bpe(
 
 
 if __name__ == "__main__":
-    train_bpe("data/TinyStoriesV2-GPT4-valid.txt",10000,["<|endoftext|>"])
+    train_bpe("data/TinyStoriesV2-GPT4-valid.txt",1000,["<|endoftext|>"])

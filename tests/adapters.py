@@ -8,7 +8,7 @@ import numpy.typing as npt
 import torch
 from jaxtyping import Bool, Float, Int
 from torch import Tensor
-
+from cs336_basics.tokenizer import train_bpe
 
 def run_linear(
     d_in: int,
@@ -558,4 +558,12 @@ def run_train_bpe(
                 表示将 <token1> 与 <token2> 合并。
                 各项按照合并的创建顺序排列。
     """
+    return train_bpe(
+        input_path=input_path,
+        vocab_size=vocab_size,
+        special_tokens=special_tokens,
+    )
+
+
+
     raise NotImplementedError
