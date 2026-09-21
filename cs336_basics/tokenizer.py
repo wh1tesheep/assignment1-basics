@@ -2,6 +2,7 @@ import os
 import regex as re
 from .pretokenization_example import find_chunk_boundaries
 from collections import Counter
+from collections.abc import Iterable,Iterator
 chunk_token = b"<|endoftext|>"
 PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
 
@@ -104,6 +105,63 @@ def train_bpe(
 
     raise NotImplementedError
 
+class Tokenizer:
+
+    def __init__(
+        self, 
+        vocab: dict[int, bytes], 
+        merges: list[tuple[bytes, bytes]], 
+        special_tokens: list[str] | None = None
+    ):
+        self.vocab = vocab
+        self.merges = merges
+        self.special_tokens = special_tokens
+
+    def encode(self, text: str) -> list[int]:
+
+        #先开始预分词 用spacial_token分割字符串
+        escaped_tokens = [re.escape(token) for token in self.special_tokens]
+
+        raise NotImplementedError
+        
+    def encode_iterable(self, iterable: Iterable[str]) -> Iterator[int]:
+
+
+        raise NotImplementedError
+
+    def decode(self, ids: list[int]) -> str:
+
+
+        raise NotImplementedError
+    
+    @classmethod
+    def from_files(
+        cls, 
+        vocab_filepath: str, 
+        merges_filepath: str, 
+        special_tokens: list[str] | None = None
+    ) -> "Tokenizer":
+
+
+
+        raise NotImplementedError
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
-    train_bpe("data/TinyStoriesV2-GPT4-valid.txt",1000,["<|endoftext|>"])
+    vocab_test,merged_test = train_bpe("data/TinyStoriesV2-GPT4-valid.txt",1000,["<|endoftext|>"])
