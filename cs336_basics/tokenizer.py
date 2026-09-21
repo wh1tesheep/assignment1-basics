@@ -46,7 +46,13 @@ def train_bpe(
     
         #pretoken_counts仍然是字符串:频数，要转化为pretoken_bytes:dict[tuple[bytes, ...], int]  
         for prestr,counts in pretoken_counts.items():
-            pretoken_bytes[tuple(i.encode("utf-8") for i in prestr)] = counts
+            #pretoken_bytes[tuple(i.encode("utf-8") for i in prestr)] = counts
+            prelist_utf8 = list(i.encode("utf-8") for i in prestr)
+            prelist = []
+            for i in prelist_utf8:
+                for j in i:
+                    prelist.append(bytes([j]))
+            pretoken_bytes[tuple(prelist)] = counts
         #print(pretoken_bytes) #test
     #关闭文件
 
