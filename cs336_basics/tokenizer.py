@@ -129,6 +129,7 @@ class Tokenizer:
         if(self.special_tokens == []):
             parts = [text]
         else:
+            self.special_tokens= sorted(self.special_tokens,key=len,reverse=True)
             escaped_tokens = [re.escape(token) for token in self.special_tokens]
             pattern = "("+"|".join(escaped_tokens)+")"
             parts = re.split(pattern, text)
@@ -152,7 +153,44 @@ class Tokenizer:
                     tmp_token.append(bytes([j]))
             pretoken_bytes.append(tmp_token)
         #字节级分词已完成，准备开始查merge进行merge
-        
+        for merge in self.merges:
+            new_pretoken_bytes = []
+            for i in pretoken_bytes:
+                if(not isinstance(i,list)):
+                    new_pretoken_bytes.append(i)
+                    continue
+                if(len(i)<2):
+                    new_pretoken_bytes.append(i)
+                    continue
+                j = 0
+                new_i = []
+                while(j < len(i)):
+                    if(j == len(i)-1):
+                        new_i.append(i[j])
+                        j +=1
+                        continue
+                    if((i[j],i[j+1])==merge):
+                        new_i.append(i[j]+i[j+1])
+                        j+=2
+                        continue
+                    new_i.append(i[j])
+                    j+=1
+                new_pretoken_bytes.append(new_i)
+            pretoken_bytes = new_pretoken_bytes
+        #merge完毕，开始根据vocab进行转化
+        tokens = []
+        #先建立反向vocab字典
+        reverse_vocab:dict[bytes,int] = {}
+        for key,value in self.vocab.items():
+            reverse_vocab[value] = key
+        for i in pretoken_bytes:
+            if(not isinstance(i,list)):
+                tokens.append(reverse_vocab[bytes(i,encoding="utf-8")])
+                continue
+            for j in i:
+                tokens.append(reverse_vocab[j])
+        return tokens
+
 
         raise NotImplementedError
         
@@ -162,7 +200,12 @@ class Tokenizer:
         raise NotImplementedError
 
     def decode(self, ids: list[int]) -> str:
-
+        text_bytes_list = []
+        for i in ids:
+            text_bytes_list.append(self.vocab[i])
+        text_bytes = b"".join(text_bytes_list)
+        text = text_bytes.decode("utf-8",errors="replace")
+        return text
 
         raise NotImplementedError
     
