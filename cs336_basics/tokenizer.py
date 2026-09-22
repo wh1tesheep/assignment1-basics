@@ -40,7 +40,10 @@ def train_bpe(
         for start, end in zip(boundaries[:-1], boundaries[1:]):
             f.seek(start)
             chunk = f.read(end - start).decode("utf-8", errors="ignore")
-            parts = re.split(pattern, chunk)
+            if(special_tokens == []):
+                parts = [chunk]
+            else:
+                parts = re.split(pattern, chunk)
             for part in parts:
                 pretoken_counts.update(match.group(0) for match in pattern_PAT.finditer(part))
         #print(pretoken_counts) #test
@@ -69,6 +72,9 @@ def train_bpe(
             for i in range(len(tp)-1):
                 pair = (tp[i],tp[i+1])
                 pair_counts[pair] += value
+        #如果pair_counts为空，说明已经没有新的字节对
+        if not pair_counts:
+            break
         pair_max_tuple = max(((pair,frequency) for pair,frequency in pair_counts.items()),key=lambda item:(item[1],item[0]))
         pair_max = pair_max_tuple[0]
         merges.append(pair_max)
@@ -115,12 +121,34 @@ class Tokenizer:
     ):
         self.vocab = vocab
         self.merges = merges
-        self.special_tokens = special_tokens
+        self.special_tokens = [] if special_tokens is None else special_tokens
 
     def encode(self, text: str) -> list[int]:
+        pattern_PAT = re.compile(PAT)
+        #预分词，得把字符串根据特殊token拆开成列表，然后对每个不包含特殊token的字符串再进行PAT
+        if(self.special_tokens == []):
+            parts = [text]
+        else:
+            escaped_tokens = [re.escape(token) for token in self.special_tokens]
+            pattern = "("+"|".join(escaped_tokens)+")"
+            parts = re.split(pattern, text)
+        pretokens = []
+        for part in parts:
+            if part in self.special_tokens:
+                pretokens.append(part)
+                continue
+            for match in pattern_PAT.finditer(part):
+                pretokens.append(match.group(0))
+        #将预分词产生的pretoken再进行字节级分词
+        pretoken_bytes = []
+        for pretoken in pretokens:
+            if pretoken in self.special_tokens:
+                pretoken_bytes.append(pretoken)
+                continue
+        pretoken_utf8 = list(i.encode("utf-8") for i in pretoken)                         
 
-        #先开始预分词 用spacial_token分割字符串
-        escaped_tokens = [re.escape(token) for token in self.special_tokens]
+
+
 
         raise NotImplementedError
         
@@ -164,4 +192,10 @@ class Tokenizer:
 
 
 if __name__ == "__main__":
-    vocab_test,merged_test = train_bpe("data/TinyStoriesV2-GPT4-valid.txt",1000,["<|endoftext|>"])
+    #vocab_test,merged_test = train_bpe("data/TinyStoriesV2-GPT4-valid.txt",1000,["<|endoftext|>"])
+    #vocab_0sp,merged_0sp = train_bpe("data/TinyStoriesV2-GPT4-valid.txt",1000,[])
+    #print(vocab_0sp)
+    vocab_empty,merged_empty = train_bpe("data/bpe_edge_cases/empty.txt",500,[])
+    vocab_a,merged_a = train_bpe("data/bpe_edge_cases/single_a.txt",500,[])
+    print(vocab_a,merged_a)
+    print(vocab_empty,vocab_empty)
