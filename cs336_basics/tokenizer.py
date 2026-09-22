@@ -145,10 +145,14 @@ class Tokenizer:
             if pretoken in self.special_tokens:
                 pretoken_bytes.append(pretoken)
                 continue
-        pretoken_utf8 = list(i.encode("utf-8") for i in pretoken)                         
-
-
-
+            pretoken_utf8 = list(i.encode("utf-8") for i in pretoken)
+            tmp_token = []                        
+            for i in pretoken_utf8:
+                for j in i:
+                    tmp_token.append(bytes([j]))
+            pretoken_bytes.append(tmp_token)
+        #字节级分词已完成，准备开始查merge进行merge
+        
 
         raise NotImplementedError
         
